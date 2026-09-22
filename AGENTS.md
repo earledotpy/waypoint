@@ -1,8 +1,8 @@
 # AGENTS.md — Waypoint
 
-Waypoint is a local-first desktop skill tracker (Tauri v2, React + TypeScript, a Rust domain layer over SQLite). It has two goals of equal weight: the product, and the author's learning. The author knows Python and is watching this app get built as groundwork for learning Rust. They review and merge every change but don't write the code.
+Waypoint is a local-first desktop skill tracker (Tauri v2, React + TypeScript, a Rust domain layer over SQLite). It has two goals of equal weight: the product, and the author's learning. The author is learning Python and is watching this app get built as groundwork for learning Rust. They review and merge every change but don't write the code.
 
-So **the reader is learning.** Every diff, comment, PR description and doc is written for someone who knows Python but not Rust or TypeScript. When two designs work equally well, pick the one that is easier to read and explain.
+So **the reader is learning.** Every diff, comment, PR description and doc is written for someone who has basic understanding of Python but not Rust or TypeScript. When two designs work equally well, pick the one that is easier to read and explain.
 
 ## Read first
 
