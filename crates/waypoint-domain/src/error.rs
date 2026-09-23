@@ -18,6 +18,10 @@ pub enum DomainError {
     /// Bringing the schema up to date failed. The database is left exactly
     /// as it was, because the pending migrations share one transaction.
     Migration(rusqlite_migration::Error),
+    /// A skill node's title was empty or only spaces. Checked before SQLite
+    /// is touched, so the learner gets this message rather than a CHECK
+    /// constraint failure. It wraps no library error.
+    EmptyTitle,
 }
 
 // `Display` is the human-readable message, what `print(str(e))` shows in
@@ -27,6 +31,7 @@ impl fmt::Display for DomainError {
         match self {
             DomainError::Database(e) => write!(f, "database error: {e}"),
             DomainError::Migration(e) => write!(f, "migration error: {e}"),
+            DomainError::EmptyTitle => write!(f, "a skill node needs a title"),
         }
     }
 }
@@ -39,6 +44,9 @@ impl std::error::Error for DomainError {
         match self {
             DomainError::Database(e) => Some(e),
             DomainError::Migration(e) => Some(e),
+            // Waypoint's own rule failed, not a library, so there's no
+            // underlying cause to hand back.
+            DomainError::EmptyTitle => None,
         }
     }
 }

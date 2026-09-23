@@ -8,6 +8,8 @@ A Rust function that can fail returns a `Result`, which is *either* the value (`
 
 - `crates/waypoint-domain/src/db.rs`, `open`, `open_in_memory` and `prepare`: each returns `Result<Connection, DomainError>` and uses `?` after every call that can fail.
 - `crates/waypoint-domain/src/error.rs`, `DomainError`: the one error type the domain returns, and the two `impl From<…>` blocks that let `?` convert library errors into it.
+- `crates/waypoint-domain/src/node.rs`, `create_node`: returns `Err(DomainError::EmptyTitle)` itself for a blank title, and uses `?` on the `INSERT`.
+- `crates/waypoint-read/src/node.rs`, `list_nodes`: returns `rusqlite::Result<Vec<SkillNode>>`, not a `DomainError` (see "Two error types" below).
 
 ## What it does
 
@@ -31,6 +33,10 @@ let conn = Connection::open(path)?;
 Note the `DomainError::from(e)`. `Connection::open` fails with a `rusqlite::Error`, but `open` promises to return a `DomainError`. `?` bridges the two by calling `From`: it looks for an `impl From<rusqlite::Error> for DomainError`. `error.rs` provides that impl, and it wraps the library error in the `Database` variant. The same happens in `prepare`, where `migrations().to_latest(&mut conn)?` fails with a `rusqlite_migration::Error` and `?` uses the second `From` impl to wrap it in `Migration`. If no matching `From` exists, the code doesn't compile.
 
 `Ok(conn)` at the end of `prepare` is the success case, written out.
+
+### Two error types: `DomainError` and `rusqlite::Result`
+
+`create_node` returns `Result<SkillNode, DomainError>`, but `list_nodes` returns `rusqlite::Result<Vec<SkillNode>>`, which is short for `Result<Vec<SkillNode>, rusqlite::Error>`. The difference comes from where each function lives. `list_nodes` is in `waypoint-read`, which may not depend on `waypoint-domain` ([ADR 0001](../../adr/0001-crate-layout-write-hiding-and-frontend-tooling.md) §2), so it can't even name `DomainError`. That's fine, because a read can only fail one way: SQLite refused. `create_node` can also fail by Waypoint's own rules, like `EmptyTitle`, and those failures need a variant of their own. The two fit together through `?`: domain code that calls `list_nodes(conn)?` gets its `rusqlite::Error` wrapped in `DomainError::Database` by the same `From` impl as any other SQLite call.
 
 ## Python comparison
 

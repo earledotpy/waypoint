@@ -3990,12 +3990,17 @@ dependencies = [
  "rusqlite",
  "rusqlite_migration",
  "tempfile",
+ "uuid",
  "waypoint-read",
 ]
 
 [[package]]
 name = "waypoint-read"
 version = "0.1.0"
+dependencies = [
+ "rusqlite",
+ "serde",
+]
 
 [[package]]
 name = "web-sys"
