@@ -30,6 +30,14 @@ rusqlite = { version = "0.40", features = ["bundled"] }
 # Runs the numbered schema migrations and records progress in
 # `PRAGMA user_version`. See docs/learning/concepts/sqlite-migrations.md.
 rusqlite_migration = "2.6"
+# Unique ids. `v7` ids begin with a timestamp, so they sort in the order they
+# were made (ADR 0002).
+uuid = { version = "1", features = ["v7"] }
+# Turns Rust values into JSON for the frontend. `derive` lets a type get that
+# code written for it with `#[derive(Serialize)]`. Tauri requires it.
+# See docs/adr/0003-serde-and-derive.md and
+# docs/learning/concepts/struct-and-derive.md.
+serde = { version = "1", features = ["derive"] }
 # Temporary folders for tests, deleted automatically when the test ends.
 tempfile = "3"
 

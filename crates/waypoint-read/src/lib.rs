@@ -5,3 +5,7 @@
 //!
 //! This crate has no workspace dependencies, so any crate can depend on it
 //! without gaining a way to write. See ADR 0001 §2.
+
+mod node;
+
+pub use node::{SkillNode, list_nodes};

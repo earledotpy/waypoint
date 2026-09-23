@@ -11,6 +11,7 @@ rust-version.workspace = true
 waypoint-read = { workspace = true }
 rusqlite = { workspace = true }
 rusqlite_migration = { workspace = true }
+uuid = { workspace = true }
 
 # Used only by tests, never shipped in the app.
 [dev-dependencies]

@@ -8,6 +8,8 @@
 
 mod db;
 mod error;
+mod node;
 
 pub use db::{open, open_in_memory};
 pub use error::DomainError;
+pub use node::create_node;
