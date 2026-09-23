@@ -15,7 +15,10 @@ pub fn create_node(
     description: &str,
 ) -> Result<SkillNode, DomainError> {
     let title = title.trim();
-    let description = description.trim();
+    // The description is Markdown (architecture doc §2, v0.4), where leading
+    // spaces can matter: four of them make a code block. So only the end is
+    // trimmed. Trailing spaces and newlines never change how Markdown shows.
+    let description = description.trim_end();
     // Once trimmed, a title of spaces is empty too. Stop here, before SQLite:
     // the table's CHECK would also refuse it, but with a database error the
     // user can't act on.
@@ -31,6 +34,11 @@ pub fn create_node(
     // §2) says a new node with no unmet prerequisites starts Available, and
     // edges (so prerequisites) don't exist until milestone 2. Milestone 2
     // will work out Locked or Available here instead.
+    //
+    // TODO(milestone 2): ADR 0002 §4. The ADR says the Rust layer writes
+    // state only from a Rust enum. Until `NodeState` exists, `'available'`
+    // is a literal in this one statement, and the table's CHECK constraint
+    // catches a typo.
     //
     // TODO(milestone 2): I7. Every state change, creation included, must also
     // write one `node_state_event` row. That table arrives in milestone 2,
@@ -56,6 +64,16 @@ mod tests {
     use super::*;
     use crate::db::open_in_memory;
     use waypoint_read::list_nodes;
+
+    #[test]
+    fn create_node_keeps_leading_indentation_in_a_description() {
+        let conn = open_in_memory().unwrap();
+
+        // In Markdown, four leading spaces make a code block.
+        let node = create_node(&conn, "Assign a variable", "    let x = 1;\n\n").unwrap();
+
+        assert_eq!(node.description, "    let x = 1;");
+    }
 
     #[test]
     fn create_node_rejects_a_blank_title() {
@@ -122,7 +140,7 @@ mod tests {
     fn create_node_returns_an_available_node() {
         let conn = open_in_memory().unwrap();
 
-        let node = create_node(&conn, "  Solve linear equations  ", " One variable ").unwrap();
+        let node = create_node(&conn, "  Solve linear equations  ", "One variable \n").unwrap();
 
         assert_eq!(node.id.len(), 36, "expected a UUID, got {:?}", node.id);
         assert_eq!(node.title, "Solve linear equations");

@@ -22,7 +22,9 @@ pub struct SkillNode {
     pub description: String,
     /// One of `locked`, `available`, `in_progress`, `evidenced`. A plain
     /// `String` for now: milestone 2 (the state machine) replaces it with an
-    /// enum, so the compiler rejects any other value.
+    /// enum, so the compiler rejects any other value. Until then the
+    /// `CHECK` on `skill_node.state` is the only thing that does.
+    // TODO(milestone 2): ADR 0002 §4, a `NodeState` enum.
     pub state: String,
     /// ISO 8601 UTC with milliseconds, e.g. `2026-09-22T20:53:40.123Z`.
     pub created_at: String,
