@@ -64,6 +64,7 @@ waypoint/
 
 - **Write hiding** comes from the dependency list. `waypoint-advisory` doesn't list `waypoint-domain`, so `use waypoint_domain::…` doesn't compile there. That covers dev-dependencies too.
 - **Reads go in `waypoint-read`** from the first read onward, including `list_nodes` in milestone 1. Queries the domain needs *inside* a write, such as invariant checks in a transaction, stay private to `waypoint-domain`.
+- **Where read queries are tested.** In `waypoint-domain`, not `waypoint-read`. `waypoint-read` has no workspace dependencies, not even dev-dependencies, and only the domain can create the schema and the rows a read test needs.
 - **Read errors.** `waypoint-read` functions return `rusqlite::Result<T>`. `DomainError` already has `From<rusqlite::Error>`, so domain code can call reads with `?`. A separate `ReadError` needs its own ADR, written when a read first has a failure that isn't a database error.
 
 ### 3. Advisory never writes
