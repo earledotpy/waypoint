@@ -34,8 +34,9 @@ rusqlite_migration = "2.6"
 # were made (ADR 0002).
 uuid = { version = "1", features = ["v7"] }
 # Turns Rust values into JSON for the frontend. `derive` lets a type get that
-# code written for it with `#[derive(Serialize)]`.
-# See docs/learning/concepts/struct-and-derive.md.
+# code written for it with `#[derive(Serialize)]`. Tauri requires it.
+# See docs/adr/0003-serde-and-derive.md and
+# docs/learning/concepts/struct-and-derive.md.
 serde = { version = "1", features = ["derive"] }
 # Temporary folders for tests, deleted automatically when the test ends.
 tempfile = "3"

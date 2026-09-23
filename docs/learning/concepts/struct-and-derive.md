@@ -57,12 +57,13 @@ Where it breaks:
 
 ## Why this code uses it
 
-`SkillNode` is the one shape a node has everywhere: the domain returns it, `list_nodes` returns it, and later the app sends it to the frontend. A struct makes that shape a type the compiler checks. `Option` makes the two nullable columns (`external_id`, `retired_at`) visibly nullable, and no others. The four derives are the standard code a data type needs, and writing them by hand would be many lines of boilerplate with nothing to decide. Issue #17 asks for these derives. `derive` is a macro, and `AGENTS.md` asks for an ADR before a macro is used, so whether standard derives need one is left to the author to decide on this PR.
+`SkillNode` is the one shape a node has everywhere: the domain returns it, `list_nodes` returns it, and later the app sends it to the frontend. A struct makes that shape a type the compiler checks. `Option` makes the two nullable columns (`external_id`, `retired_at`) visibly nullable, and no others. The four derives are the standard code a data type needs, and writing them by hand would be many lines of boilerplate with nothing to decide. `derive` is a macro, and `AGENTS.md` asks for an ADR before a macro is used: [ADR 0003](../../adr/0003-serde-and-derive.md) is that ADR. It lists the seven derives that need nothing more, and explains why others (such as `Ord` or `Default`) still do.
 
-The field names are the SQL column names, left as snake_case (no serde `rename_all`), so one word finds a field in SQL, Rust and, later, TypeScript.
+The field names are the SQL column names, left as snake_case (no serde `rename_all`, ADR 0003 decision 4), so one word finds a field in SQL, Rust and, later, TypeScript.
 
 ## See also
 
+- [ADR 0003: serde, and which derives need no ADR](../../adr/0003-serde-and-derive.md)
 - [Traits and `impl` blocks](traits-and-impl.md): what a derive writes.
 - [Enums and `match`](enums-and-match.md): `Option` is an enum.
 - serde's guide, [Using derive](https://serde.rs/derive.html)
