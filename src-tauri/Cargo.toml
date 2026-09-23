@@ -26,3 +26,10 @@ tauri = { workspace = true }
 # The app is the one crate that sees every other (ADR 0001 §2).
 waypoint-domain = { workspace = true }
 waypoint-read = { workspace = true }
+# Only to name the `Connection` type in `Db`. The connection itself is always
+# made by `waypoint_domain::open`, never by this crate.
+rusqlite = { workspace = true }
+
+# Used only by tests, never shipped in the app.
+[dev-dependencies]
+tempfile = { workspace = true }
