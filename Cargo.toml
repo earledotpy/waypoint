@@ -1,0 +1,36 @@
+# The root manifest is a *virtual* workspace: it has no [package] of its own.
+# It only lists the crates that are built together and the settings they share.
+# See docs/adr/0001-crate-layout-write-hiding-and-frontend-tooling.md.
+[workspace]
+members = ["src-tauri", "crates/*"]
+# A virtual workspace has no root package whose edition Cargo could read, so
+# without this line Cargo falls back to the oldest resolver (1) and warns.
+# Resolver 3 is the one that matches edition 2024.
+resolver = "3"
+
+# Every crate copies these with `edition.workspace = true` and so on, so the
+# values live in one place.
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+# The oldest compiler the code must build on (rusqlite_migration needs 1.95).
+# The compiler actually used is pinned separately in rust-toolchain.toml.
+rust-version = "1.95"
+
+# Shared dependency versions. A crate that needs one writes
+# `name = { workspace = true }` instead of repeating the version.
+[workspace.dependencies]
+waypoint-read = { path = "crates/waypoint-read" }
+waypoint-domain = { path = "crates/waypoint-domain" }
+tauri = { version = "2", features = [] }
+tauri-build = { version = "2", features = [] }
+
+# Cargo reads [profile.*] only from the workspace root and ignores it in member
+# crates, so the template's release settings moved here from src-tauri/.
+# See https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

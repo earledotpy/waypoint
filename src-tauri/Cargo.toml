@@ -1,0 +1,28 @@
+[package]
+# The folder stays `src-tauri/`, the name every Tauri doc uses, and holds
+# tauri.conf.json, which is how the Tauri CLI finds the app. The package is
+# called waypoint-app (ADR 0001 §1).
+name = "waypoint-app"
+description = "The Waypoint desktop app: the Tauri shell the UI calls"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lib]
+# The `_lib` suffix keeps the library's name different from the binary's.
+# Without it the two outputs collide on Windows,
+# see https://github.com/rust-lang/cargo/issues/8519
+name = "waypoint_app_lib"
+# `rlib` is the normal Rust library that main.rs links against. `staticlib`
+# and `cdylib` are the shapes iOS and Android builds need; the template keeps
+# them so mobile stays possible without editing this file.
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { workspace = true }
+
+[dependencies]
+tauri = { workspace = true }
+# The app is the one crate that sees every other (ADR 0001 §2).
+waypoint-domain = { workspace = true }
+waypoint-read = { workspace = true }

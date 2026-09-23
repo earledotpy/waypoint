@@ -1,0 +1,11 @@
+[package]
+name = "waypoint-domain"
+description = "Waypoint's one writer to SQLite: the state machine and invariants I1-I7"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+# The domain names the shared types from waypoint-read. The dependency points
+# only this way: waypoint-read never depends on the domain.
+waypoint-read = { workspace = true }
