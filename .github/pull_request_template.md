@@ -22,4 +22,10 @@ Closes #
 
 ## Check it yourself
 
-<!-- Steps the author can run by hand to see the change working. -->
+<!-- Steps the author can run by hand to see the change working. Write them as PowerShell commands, run from the author's main checkout (not an agent's worktree).
+An agent's worktree may still have this PR's branch checked out, and git lets only one folder hold a branch at a time, so a plain `git switch <branch>` can fail. Start with:
+    git fetch origin
+    git switch --detach origin/<branch>
+and end with `git switch main`.
+Say what output to expect, including the pass count, and what a wrong result (such as "0 passed") would mean. -->
+
