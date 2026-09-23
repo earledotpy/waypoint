@@ -60,8 +60,7 @@ jobs:
       - name: Lint Rust
         run: cargo clippy --workspace --all-targets -- -D warnings
 
-      # Tests check behaviour, which formatting and lints can't. There are no
-      # tests yet, so for now this step proves only that every crate compiles
-      # in test mode; it starts catching real bugs as soon as tests land.
+      # Tests check behaviour, which formatting and lints can't. This runs
+      # every `#[test]` in every crate of the workspace.
       - name: Test Rust
         run: cargo test --workspace

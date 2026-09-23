@@ -21,7 +21,7 @@ Waypoint's job first sets things up: it checks out the code, installs Node 24, a
 | Build frontend | `npm run build` | TypeScript type errors (`tsc`) and a frontend that doesn't bundle. It also produces `dist/`, which the Rust build embeds, so it runs before the Cargo steps. |
 | Check Rust formatting | `cargo fmt --all --check` | Rust code not formatted the standard way. Nothing is changed. It only reports. |
 | Lint Rust | `cargo clippy --workspace --all-targets -- -D warnings` | Code that compiles but is suspicious or unidiomatic, plus every compiler warning. `-D warnings` makes warnings fail the build. |
-| Test Rust | `cargo test --workspace` | Behaviour that's wrong: every `#[test]` in every crate. Waypoint has no tests yet, so this step only proves that everything compiles in test mode. |
+| Test Rust | `cargo test --workspace` | Behaviour that's wrong: every `#[test]` in every crate, such as the database tests in `crates/waypoint-domain/src/db.rs`. |
 
 ## Python comparison
 

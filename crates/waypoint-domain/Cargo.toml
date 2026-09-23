@@ -9,3 +9,9 @@ rust-version.workspace = true
 # The domain names the shared types from waypoint-read. The dependency points
 # only this way: waypoint-read never depends on the domain.
 waypoint-read = { workspace = true }
+rusqlite = { workspace = true }
+rusqlite_migration = { workspace = true }
+
+# Used only by tests, never shipped in the app.
+[dev-dependencies]
+tempfile = { workspace = true }

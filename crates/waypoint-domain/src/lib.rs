@@ -5,3 +5,9 @@
 //!
 //! Invariants I1–I7 are enforced here and nowhere else (`AGENTS.md`). See
 //! ADR 0001 §2 and §3.
+
+mod db;
+mod error;
+
+pub use db::{open, open_in_memory};
+pub use error::DomainError;
