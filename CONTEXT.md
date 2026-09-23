@@ -49,7 +49,7 @@ A node permanently taken out of the active graph without being deleted. It is fr
 _Avoid_: deleted, archived
 
 **Curriculum**:
-An importable set of nodes and edges, written in a plain-text file.
+An importable set of nodes, edges and resources, written as plain-text files.
 _Avoid_: course, syllabus
 
 **External ID**:
