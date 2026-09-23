@@ -1,6 +1,7 @@
 [package]
-# The folder stays `src-tauri/` because the Tauri CLI looks for it by that name,
-# but the package is called waypoint-app (ADR 0001 §1).
+# The folder stays `src-tauri/`, the name every Tauri doc uses, and holds
+# tauri.conf.json, which is how the Tauri CLI finds the app. The package is
+# called waypoint-app (ADR 0001 §1).
 name = "waypoint-app"
 description = "The Waypoint desktop app: the Tauri shell the UI calls"
 version.workspace = true
@@ -12,6 +13,9 @@ rust-version.workspace = true
 # Without it the two outputs collide on Windows,
 # see https://github.com/rust-lang/cargo/issues/8519
 name = "waypoint_app_lib"
+# `rlib` is the normal Rust library that main.rs links against. `staticlib`
+# and `cdylib` are the shapes iOS and Android builds need; the template keeps
+# them so mobile stays possible without editing this file.
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

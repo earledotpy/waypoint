@@ -16,7 +16,8 @@ jobs:
     # ships on first.
     runs-on: windows-latest
     steps:
-      # Get a copy of the repository at the commit being checked.
+      # The runner starts empty. This checks out the exact commit under test,
+      # so every later step checks this change and nothing else.
       - uses: actions/checkout@v7
 
       # Node 24 matches `engines.node` in package.json. `cache: npm` reuses
@@ -54,11 +55,13 @@ jobs:
 
       # Clippy is Rust's linter: it flags code that compiles but is probably
       # a mistake or unidiomatic. `-D warnings` turns every warning into an
-      # error, so warnings can't pile up unnoticed. `--all-targets` includes
-      # tests and build scripts.
+      # error, so warnings can't pile up unnoticed. `--all-targets` lints test,
+      # example and benchmark code too, not just the libraries and the app.
       - name: Lint Rust
         run: cargo clippy --workspace --all-targets -- -D warnings
 
-      # Run every Rust test in every crate of the workspace.
+      # Tests check behaviour, which formatting and lints can't. There are no
+      # tests yet, so for now this step proves only that every crate compiles
+      # in test mode; it starts catching real bugs as soon as tests land.
       - name: Test Rust
         run: cargo test --workspace

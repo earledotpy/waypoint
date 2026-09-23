@@ -3,8 +3,9 @@
 # See docs/adr/0001-crate-layout-write-hiding-and-frontend-tooling.md.
 [workspace]
 members = ["src-tauri", "crates/*"]
-# Resolver 3 is the default for edition 2024; it is set explicitly so nobody
-# has to know that.
+# A virtual workspace has no root package whose edition Cargo could read, so
+# without this line Cargo falls back to the oldest resolver (1) and warns.
+# Resolver 3 is the one that matches edition 2024.
 resolver = "3"
 
 # Every crate copies these with `edition.workspace = true` and so on, so the

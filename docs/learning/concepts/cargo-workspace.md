@@ -40,7 +40,7 @@ The nearest Python idea is a monorepo with several packages, each in its own fol
 
 Where it breaks: Python doesn't *enforce* the dependency lists. Once everything is installed into the same environment, any package can `import` any other, whether or not its `pyproject.toml` lists it. The list is documentation plus an install instruction. In Cargo the list is the rule: the compiler only lets a crate see the crates it declared. An undeclared import fails the build, every time, on every machine.
 
-A second difference: Cargo refuses dependency cycles. If `waypoint-read` declared `waypoint-domain` while the domain declares `waypoint-read`, Cargo rejects the workspace. In Python, circular imports are allowed and fail (or not) at runtime depending on import order.
+A second difference: Cargo refuses dependency cycles among normal dependencies. If `waypoint-read` declared `waypoint-domain` while the domain declares `waypoint-read`, Cargo rejects the workspace. In Python, circular imports are allowed and fail (or not) at runtime depending on import order. The one gap: Cargo *does* allow a cycle through a `[dev-dependencies]` entry (dependencies used only by tests), which is why ADR 0001 also plans a test that checks the crate graph.
 
 ## Why this code uses it
 
