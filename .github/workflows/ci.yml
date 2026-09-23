@@ -1,0 +1,64 @@
+# Continuous integration: GitHub runs these checks on every pull request and
+# on every push to main. They are the same commands you can run locally
+# (AGENTS.md workflow step 4), so a green run here means "it builds and passes
+# on a clean machine", not just on the author's laptop.
+# See docs/learning/concepts/continuous-integration.md.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    # Windows, because that is the author's platform and the one Waypoint
+    # ships on first.
+    runs-on: windows-latest
+    steps:
+      # Get a copy of the repository at the commit being checked.
+      - uses: actions/checkout@v7
+
+      # Node 24 matches `engines.node` in package.json. `cache: npm` reuses
+      # downloaded packages between runs, keyed on package-lock.json.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # No Rust setup step: rustup is preinstalled on the runner, and the first
+      # `cargo` command installs the version pinned in rust-toolchain.toml.
+      # That file is the one place the Rust version lives.
+
+      # A cold Rust build takes about 10 minutes. This caches compiled
+      # dependencies in target/ between runs, keyed on Cargo.lock and the
+      # toolchain, so later runs only rebuild Waypoint's own crates.
+      - uses: Swatinem/rust-cache@v2
+
+      # Install exactly the versions in package-lock.json. Unlike
+      # `npm install`, `npm ci` fails if the lock file and package.json
+      # disagree, instead of quietly updating the lock file.
+      - name: Install frontend dependencies
+        run: npm ci
+
+      # Type-check the TypeScript (`tsc`) and build the frontend into dist/.
+      # This must come before the Cargo steps: `tauri::generate_context!`
+      # embeds dist/ into the app at compile time and fails if it is missing.
+      - name: Build frontend
+        run: npm run build
+
+      # Fails if any Rust file isn't formatted the way `cargo fmt` would
+      # format it. This keeps diffs about behaviour, not whitespace.
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
+      # Clippy is Rust's linter: it flags code that compiles but is probably
+      # a mistake or unidiomatic. `-D warnings` turns every warning into an
+      # error, so warnings can't pile up unnoticed. `--all-targets` includes
+      # tests and build scripts.
+      - name: Lint Rust
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      # Run every Rust test in every crate of the workspace.
+      - name: Test Rust
+        run: cargo test --workspace

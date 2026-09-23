@@ -1,0 +1,10 @@
+[package]
+name = "waypoint-read"
+description = "Waypoint's shared types and read-only queries"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+# No workspace dependencies, not even dev-dependencies (ADR 0001 §2). Anything
+# may depend on this crate, so it must not reach the write code.
+[dependencies]

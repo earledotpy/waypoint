@@ -1,0 +1,7 @@
+# Pins the Rust compiler so the laptop and CI build with exactly the same one
+# (ADR 0001 §6). rustup reads this file and installs the version on first use.
+# Upgrading Rust is a one-line change here.
+[toolchain]
+channel = "1.98.1"
+# CI runs `cargo fmt` and `cargo clippy`, which are separate components.
+components = ["rustfmt", "clippy"]
