@@ -21,7 +21,7 @@ pub struct SkillNode {
 }
 ```
 
-- **`struct`** declares the type and its fields. Every field has a type, and a value can't be built without every field: `SkillNode { id: …, title: … }` with a field missing doesn't compile. `pub` makes a field readable outside the crate.
+- **`struct`** declares the type and its fields. Every field has a type, and a value can't be built without every field: `SkillNode { id: …, title: … }` with a field missing doesn't compile. `pub` makes a field visible outside the crate, so other code can read it, and change it if it owns the node mutably.
 - **`Option<String>`** is an enum with two variants, `None` and `Some(String)` (see [enums and `match`](enums-and-match.md)). It maps directly onto a nullable column: a `NULL` `external_id` reads back as `None`. A field that's plain `String` can never be missing, so code that reads `node.title` never has to check.
 - **`#[derive(…)]`** makes the compiler write an `impl` block for each listed trait (see [traits and `impl`](traits-and-impl.md)):
   - `Debug`: the developer-facing print, `{:?}`. A failing `assert_eq!` uses it to show both sides.
@@ -57,7 +57,7 @@ Where it breaks:
 
 ## Why this code uses it
 
-`SkillNode` is the one shape a node has everywhere: the domain returns it, `list_nodes` returns it, and later the app sends it to the frontend. A struct makes that shape a type the compiler checks. `Option` makes the two nullable columns (`external_id`, `retired_at`) visibly nullable, and no others. The four derives are the standard code a data type needs, and writing them by hand would be many lines of boilerplate with nothing to decide, which is why `derive` isn't the kind of "clever" code `AGENTS.md` asks an ADR for.
+`SkillNode` is the one shape a node has everywhere: the domain returns it, `list_nodes` returns it, and later the app sends it to the frontend. A struct makes that shape a type the compiler checks. `Option` makes the two nullable columns (`external_id`, `retired_at`) visibly nullable, and no others. The four derives are the standard code a data type needs, and writing them by hand would be many lines of boilerplate with nothing to decide. Issue #17 asks for these derives. `derive` is a macro, and `AGENTS.md` asks for an ADR before a macro is used, so whether standard derives need one is left to the author to decide on this PR.
 
 The field names are the SQL column names, left as snake_case (no serde `rename_all`), so one word finds a field in SQL, Rust and, later, TypeScript.
 

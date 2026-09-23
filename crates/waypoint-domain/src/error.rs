@@ -19,7 +19,7 @@ pub enum DomainError {
     /// as it was, because the pending migrations share one transaction.
     Migration(rusqlite_migration::Error),
     /// A skill node's title was empty or only spaces. Checked before SQLite
-    /// is touched, so the learner gets this message rather than a CHECK
+    /// is touched, so the user gets this message rather than a CHECK
     /// constraint failure. It wraps no library error.
     EmptyTitle,
 }

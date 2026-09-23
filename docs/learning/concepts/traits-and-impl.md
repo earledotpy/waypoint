@@ -28,7 +28,7 @@ The same pattern gives `DomainError` its other abilities:
 - **`std::error::Error`** requires `Display` and `Debug` to exist already, and adds an optional `source` method. `dyn std::error::Error` in `source`'s return type means "a value of *some* type that implements `Error`". The caller doesn't need to know which one.
 - **`#[derive(Debug)]`** is the shortcut: for a few standard traits, the compiler can write the impl from the type's shape. `Debug` is the developer-facing print (`{e:?}`), used by `.unwrap()` when it panics.
 
-An `impl` block with no trait (`impl DomainError { fn … }`) also exists. It adds ordinary methods to one type. Waypoint has none yet.
+An `impl` block with no trait also exists. It adds ordinary functions to one type. `impl SkillNode { pub fn from_row(…) }` in `crates/waypoint-read/src/node.rs` is Waypoint's first, and it's called on the type, as `SkillNode::from_row` (see [`struct` and `derive`](struct-and-derive.md)).
 
 ## Python comparison
 

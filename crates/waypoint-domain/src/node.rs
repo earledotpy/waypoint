@@ -18,7 +18,7 @@ pub fn create_node(
     let description = description.trim();
     // Once trimmed, a title of spaces is empty too. Stop here, before SQLite:
     // the table's CHECK would also refuse it, but with a database error the
-    // learner can't act on.
+    // user can't act on.
     if title.is_empty() {
         return Err(DomainError::EmptyTitle);
     }
@@ -37,13 +37,14 @@ pub fn create_node(
     // whose migration backfills a creation event (`from_state` NULL, `actor`
     // `human`) for every node made before it.
     //
-    // SQLite supplies `created_at`, so every timestamp comes from one clock
-    // in one format. `RETURNING *` hands back the row as stored, so the
-    // caller sees exactly what's in the database, not what we meant to write.
+    // SQLite supplies `created_at`, so every stored timestamp has the same
+    // format (the id's embedded time comes from Rust's clock, but only its
+    // order matters). `RETURNING` hands back the row as stored, so the caller
+    // sees exactly what's in the database, not what we meant to write.
     let node = conn.query_row(
         "INSERT INTO skill_node (id, external_id, title, description, state, created_at)
          VALUES (?1, NULL, ?2, ?3, 'available', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
-         RETURNING *",
+         RETURNING id, external_id, title, description, state, created_at, retired_at",
         (&id, title, description),
         SkillNode::from_row,
     )?;
@@ -92,20 +93,36 @@ mod tests {
     #[test]
     fn list_nodes_returns_nodes_oldest_first() {
         let conn = open_in_memory().unwrap();
-        let first = create_node(&conn, "Count to ten", "").unwrap();
-        let second = create_node(&conn, "Add single digits", "").unwrap();
-        let third = create_node(&conn, "Subtract single digits", "").unwrap();
+        // Nodes made by `create_node` are stored in the same order as their
+        // timestamps, and SQLite happens to return rows in the order they were
+        // stored, so they'd pass this test even with no `ORDER BY`. Writing the
+        // rows directly lets the test store them out of order: the newest
+        // first, and two that share a `created_at`, with the larger id first.
+        conn.execute_batch(
+            "INSERT INTO skill_node (id, title, state, created_at) VALUES
+             ('0199a1b2-0000-7000-8000-000000000003', 'Subtract single digits',
+              'available', '2026-09-23T10:00:00.000Z'),
+             ('0199a1b2-0000-7000-8000-000000000002', 'Add single digits',
+              'available', '2026-09-23T10:00:00.000Z'),
+             ('0199a1b2-0000-7000-8000-000000000001', 'Count to ten',
+              'available', '2026-09-23T09:00:00.000Z');",
+        )
+        .unwrap();
 
-        // Made in quick succession, so some may share a `created_at`
-        // millisecond: this also checks the tie-break on `id`.
-        assert_eq!(list_nodes(&conn).unwrap(), vec![first, second, third]);
+        let nodes = list_nodes(&conn).unwrap();
+
+        // Oldest `created_at` first, then the tie broken by `id`.
+        assert_eq!(nodes.len(), 3);
+        assert_eq!(nodes[0].title, "Count to ten");
+        assert_eq!(nodes[1].title, "Add single digits");
+        assert_eq!(nodes[2].title, "Subtract single digits");
     }
 
     #[test]
     fn create_node_returns_an_available_node() {
         let conn = open_in_memory().unwrap();
 
-        let node = create_node(&conn, "  Solve linear equations  ", "One variable").unwrap();
+        let node = create_node(&conn, "  Solve linear equations  ", " One variable ").unwrap();
 
         assert_eq!(node.id.len(), 36, "expected a UUID, got {:?}", node.id);
         assert_eq!(node.title, "Solve linear equations");
