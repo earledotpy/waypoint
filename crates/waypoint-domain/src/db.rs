@@ -4,7 +4,8 @@
 //! tests), so every connection gets the same settings and the same schema
 //! (architecture doc §2 and §6). Nothing else should call rusqlite's
 //! `Connection::open` directly.
-//! See docs/learning/concepts/sqlite-migrations.md.
+//! See docs/learning/concepts/sqlite-migrations.md, and borrowing.md for
+//! the `&Path` / `&mut conn` / `mut conn` in the signatures below.
 
 use std::path::Path;
 

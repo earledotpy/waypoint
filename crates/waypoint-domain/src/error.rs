@@ -5,7 +5,8 @@
 //! `impl From<…>` blocks at the bottom exist so domain code can use `?` on
 //! library calls. They're written out by hand rather than generated with
 //! `thiserror` (`AGENTS.md`, "Plain construction").
-//! See docs/learning/concepts/result-and-question-mark.md.
+//! See docs/learning/concepts/result-and-question-mark.md,
+//! traits-and-impl.md and enums-and-match.md.
 
 use std::fmt;
 
