@@ -24,6 +24,14 @@ waypoint-read = { path = "crates/waypoint-read" }
 waypoint-domain = { path = "crates/waypoint-domain" }
 tauri = { version = "2", features = [] }
 tauri-build = { version = "2", features = [] }
+# SQLite. `bundled` compiles SQLite from source into the app, so every machine
+# runs the same SQLite version instead of whatever the OS happens to ship.
+rusqlite = { version = "0.40", features = ["bundled"] }
+# Runs the numbered schema migrations and records progress in
+# `PRAGMA user_version`. See docs/learning/concepts/sqlite-migrations.md.
+rusqlite_migration = "2.6"
+# Temporary folders for tests, deleted automatically when the test ends.
+tempfile = "3"
 
 # Cargo reads [profile.*] only from the workspace root and ignores it in member
 # crates, so the template's release settings moved here from src-tauri/.

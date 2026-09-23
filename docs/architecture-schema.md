@@ -95,7 +95,7 @@ Table definitions below reflect the resolved decisions above. Types are illustra
 - Enums get a `CHECK` constraint as a backstop behind the Rust layer.
 - Each migration is its own `.sql` file.
 
-ADR 0002 lands with the milestone-1 build issue [Open the database and create the skill_node table](https://github.com/earledotpy/waypoint/issues/16), and it holds the rejected alternatives.
+[ADR 0002](adr/0002-table-conventions.md) records these, with the rejected alternatives.
 
 ### `skill_node`
 | Field | Type | Notes |
