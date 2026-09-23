@@ -12,7 +12,7 @@
 
 ## Python comparison
 
-<!-- The nearest Python idea, and where the analogy breaks. -->
+<!-- Required. The nearest Python idea, and where the analogy breaks. If there's no honest analogy (ownership and borrowing, for example), say so plainly and name what will feel strange to a Python reader. Don't force one: a wrong analogy is worse than none. -->
 
 ## Why this code uses it
 
