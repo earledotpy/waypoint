@@ -45,9 +45,10 @@ fn prepare(mut conn: Connection) -> Result<Connection, DomainError> {
     // SQLite ignores foreign keys unless each connection turns them on. Later
     // tables (edges, evidence records) rely on them.
     conn.pragma_update(None, "foreign_keys", "ON")?;
-    // Write-ahead logging: readers don't block the writer, and a crash
-    // mid-write can't corrupt the file. An in-memory database has no file
-    // to log beside, so SQLite quietly keeps its "memory" mode there.
+    // Write-ahead logging: readers don't block the writer, so a read (for
+    // example, the UI refreshing a list) never waits for a write to finish.
+    // An in-memory database has no file to log beside, so SQLite quietly
+    // keeps its "memory" mode there.
     conn.pragma_update(None, "journal_mode", "WAL")?;
     // Runs every migration newer than the database's `user_version`. It runs
     // before `open` returns, so no command ever sees an old schema.

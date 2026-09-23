@@ -1,11 +1,10 @@
 //! The one error type every `waypoint-domain` function returns.
 //!
-//! Each variant wraps the error from one library that can fail. The
-//! `impl From<…>` blocks at the bottom are what let a domain function write
-//! `?` after a rusqlite or rusqlite_migration call: `?` sees the library's
-//! error, finds the matching `From`, and converts it into a `DomainError`.
-//! They're written out by hand rather than generated with `thiserror`
-//! (`AGENTS.md`, "Plain construction").
+//! Each variant wraps the error from one library that can fail, so the app
+//! has one error type to handle whichever library failed underneath. The
+//! `impl From<…>` blocks at the bottom exist so domain code can use `?` on
+//! library calls. They're written out by hand rather than generated with
+//! `thiserror` (`AGENTS.md`, "Plain construction").
 //! See docs/learning/concepts/result-and-question-mark.md.
 
 use std::fmt;
