@@ -13,7 +13,7 @@ If the title is blank, or only spaces, nothing is added. The text "A node needs 
 
 ## The path
 
-The call goes down through four layers to SQLite, and the stored node comes back up the same way.
+The call goes down from React, through Tauri and the domain, to SQLite, and the stored node comes back up the same way.
 
 | Layer | File | Function | What happens |
 |---|---|---|---|
@@ -70,7 +70,7 @@ The second line does the real work, and it's the whole rest of the command:
 waypoint_domain::create_node(&conn, &title, &description).map_err(|e| e.to_string())
 ```
 
-The `&` hands the domain a borrowed look at the connection and the text, rather than giving them away (see [Borrowing in signatures](../concepts/borrowing-in-signatures.md)). The domain returns a `Result<SkillNode, DomainError>` (see [`Result` and `?`](../concepts/result-and-question-mark.md)). `.map_err` leaves an `Ok` alone and turns an `Err(DomainError)` into `Err(String)`, its message. It has to: the page can only receive things that become JSON, and a plain message is what it shows the user.
+The `&` hands the domain a borrowed look at the connection and the text, rather than giving them away (see [Borrowing in signatures](../concepts/borrowing-in-signatures.md)). The domain returns a `Result<SkillNode, DomainError>` (see [`Result` and `?`](../concepts/result-and-question-mark.md)). `.map_err` leaves an `Ok` alone and turns an `Err(DomainError)` into `Err(String)`, its message. It has to: the page can only receive things that become JSON, and a plain message is what it shows the user (see "Errors must turn into JSON too" in [Tauri commands](../concepts/tauri-command.md)).
 
 The command has no rules of its own. It doesn't check the title. That's deliberate: commands stay thin, and every rule lives in the domain ([ADR 0001 §2](../../adr/0001-crate-layout-write-hiding-and-frontend-tooling.md#2-who-may-depend-on-whom)).
 
@@ -81,8 +81,8 @@ The command has no rules of its own. It doesn't check the title. That's delibera
 1. **Trim.** `title.trim()` drops spaces from both ends, and `description.trim_end()` from the end only, because leading spaces mean something in Markdown (four of them make a code block).
 2. **Reject a blank title.** If the trimmed title is empty, return `Err(DomainError::EmptyTitle)` straight away, before SQLite is touched. (More on this in [When the title is blank](#when-the-title-is-blank).)
 3. **Make an id.** `Uuid::now_v7()` makes a new UUIDv7. Its first part is the current time, so ids sort in the order nodes were made ([ADR 0002 §1](../../adr/0002-table-conventions.md#1-ids-are-uuidv7-stored-as-text)).
-4. **Insert and read back in one statement.** [`conn.query_row(…)`](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/crates/waypoint-domain/src/node.rs#L52-L58) runs the SQL in step 5 with the id, title and description as `?1`, `?2`, `?3`. Passing them as parameters, not pasting them into the SQL text, means a title like `'); DROP TABLE` is stored as a title and never run as SQL.
-5. The `?` at the end of `query_row(…)?` means "if SQLite failed, return that error now". A `rusqlite::Error` becomes a `DomainError::Database` on the way out, thanks to the [`From` impl](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/crates/waypoint-domain/src/error.rs#L55-L59) in `error.rs` (see [Traits and `impl` blocks](../concepts/traits-and-impl.md)). If it worked, `Ok(node)` is returned.
+4. **Insert and read back in one statement.** [`conn.query_row(…)`](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/crates/waypoint-domain/src/node.rs#L52-L58) runs the SQL shown in section 5 below with the id, title and description as `?1`, `?2`, `?3`. Passing them as parameters, not pasting them into the SQL text, means a title like `'); DROP TABLE` is stored as a title and never run as SQL.
+5. **Pass on a failure.** The `?` at the end of `query_row(…)?` means "if SQLite failed, return that error now". A `rusqlite::Error` becomes a `DomainError::Database` on the way out, thanks to the [`From` impl](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/crates/waypoint-domain/src/error.rs#L55-L59) in `error.rs` (see [Traits and `impl` blocks](../concepts/traits-and-impl.md)). If it worked, `Ok(node)` is returned.
 
 ### 5. SQLite: the row
 
@@ -117,7 +117,7 @@ setDescription("");
 setError(null);
 ```
 
-`[...nodes, created]` is a *new* list with the node on the end. React only redraws when it's handed a new value, so changing the old list in place wouldn't show. The setters make React run `SkillNodes` again, and this time [`nodes.map(…)`](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/src/SkillNodes.tsx#L98-L114) draws one more `<li>`, showing the title, the state and the time. Note that the screen does **not** call `list_nodes` again: the node it shows is the one `RETURNING` handed back.
+`[...nodes, created]` is a *new* list with the node on the end. React only redraws when it's handed a new value, so changing the old list in place wouldn't show ([React state and effects](../concepts/react-state-and-effect.md)). The setters make React run `SkillNodes` again, and this time [`nodes.map(…)`](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/src/SkillNodes.tsx#L103-L112) draws one more `<li>`, showing the title, the state and the time. Note that the screen does **not** call `list_nodes` again: the node it shows is the one `RETURNING` handed back.
 
 ### When the title is blank
 
@@ -136,7 +136,7 @@ Why is a blank title rejected in the domain *and* by SQLite's `CHECK (length(tri
 
 The HTML input deliberately has no `required` attribute. The browser would otherwise block the submit with its own message, and the domain's message is the one the user should see (the [comment in the JSX](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/src/SkillNodes.tsx#L62-L68) explains).
 
-The tests that pin this path down: [`create_node_rejects_a_blank_title`](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/crates/waypoint-domain/src/node.rs#L78-L90) (domain), [`empty_title_message_is_a_sentence_for_the_user`](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/crates/waypoint-domain/src/error.rs#L71-L76) (the message), and ["shows the error when create_node fails"](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/src/SkillNodes.test.tsx#L84-L109) (the screen keeps the input and shows the alert; see [Rust unit tests](../concepts/rust-unit-tests.md) for the Rust ones).
+The tests that pin this path down: [`create_node_rejects_a_blank_title`](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/crates/waypoint-domain/src/node.rs#L78-L90) (domain) and [`empty_title_message_is_a_sentence_for_the_user`](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/crates/waypoint-domain/src/error.rs#L71-L76) (the message); see [Rust unit tests](../concepts/rust-unit-tests.md). On the screen side, ["shows the error when create_node fails"](https://github.com/earledotpy/waypoint/blob/d0271bf09f7868b7a2b55f6686f798892981be91/src/SkillNodes.test.tsx#L84-L109) fakes a failing command with a different message, so it covers what the screen does with *any* error: it shows the alert and keeps the input.
 
 ## Invariants on the way
 
@@ -155,11 +155,11 @@ Every concept note milestone 1 wrote, in the order this walkthrough meets them:
 - [React state and effects](../concepts/react-state-and-effect.md): `useState`, and why a new list makes the screen redraw.
 - [JSX](../concepts/jsx.md): the HTML-like markup in `SkillNodes`, the `onSubmit`, and the `error !== null && …` alert.
 - [Promises and `async` / `await`](../concepts/promises-and-async-await.md): `await createNode(…)`, and how a rejected promise lands in `catch`.
-- [Tauri commands](../concepts/tauri-command.md): `invoke`, `#[tauri::command]` and `generate_handler!`.
+- [Tauri commands](../concepts/tauri-command.md): `invoke`, `#[tauri::command]`, `generate_handler!`, and why the command uses `.map_err` to send its error as a string.
 - [Tauri managed state](../concepts/tauri-managed-state.md): `Db`, `app.manage` and `State<'_, Db>`.
 - [Ownership and borrowing (`&`, `&mut`)](../concepts/borrowing.md): what `&conn` means.
 - [Borrowing in signatures (`&Connection`, `&str`)](../concepts/borrowing-in-signatures.md): why the domain's `create_node` takes `&Connection` and `&str`.
-- [`Result` and `?`](../concepts/result-and-question-mark.md): `Ok` and `Err`, `.map_err`, and the `?` after `query_row`.
+- [`Result` and `?`](../concepts/result-and-question-mark.md): `Ok` and `Err`, and the `?` after `query_row`.
 - [Enums and `match`](../concepts/enums-and-match.md): `DomainError` and its variants.
 - [Traits and `impl` blocks](../concepts/traits-and-impl.md): `Display`, and the `From` impl that lets `?` convert errors.
 - [`struct`, `Option` and `#[derive(…)]`](../concepts/struct-and-derive.md): `SkillNode`, its `Option` fields, and `#[derive(Serialize)]`.
