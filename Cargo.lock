@@ -3977,8 +3977,10 @@ dependencies = [
 name = "waypoint-app"
 version = "0.1.0"
 dependencies = [
+ "rusqlite",
  "tauri",
  "tauri-build",
+ "tempfile",
  "waypoint-domain",
  "waypoint-read",
 ]
