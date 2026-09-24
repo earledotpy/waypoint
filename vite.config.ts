@@ -17,6 +17,11 @@ export default defineConfig(() => ({
   // render and be clicked without opening a window. The setup file runs
   // before each test file.
   test: {
+    // Only look for tests in src/. By default Vitest searches the whole
+    // repo, and agents' worktrees in .claude/worktrees/ hold full copies of
+    // it, each with its own node_modules. Their tests would run too, against
+    // a second copy of every library, and fail.
+    include: ["src/**/*.test.{ts,tsx}"],
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
   },
