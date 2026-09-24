@@ -59,15 +59,17 @@ function SkillNodes() {
 
   return (
     <div className="space-y-6">
-      {/* No `required` on the title: the domain decides what a valid title
-          is, and its message is the one the user should see.
+      {/* The label says the title is required, but the input has no HTML
+          `required` attribute: the browser would then block the submit with
+          its own message. The domain decides what a valid title is, and its
+          message is the one the user should see.
           The screen is deliberately unstyled. `border` is there only because
           Tailwind removes every border by default, which would leave the
           boxes invisible. */}
       <form onSubmit={handleSubmit} className="space-y-2">
         <div>
           <label htmlFor="node-title" className="block">
-            Title
+            Title (required)
           </label>
           <input
             id="node-title"

@@ -39,6 +39,8 @@ useEffect(() => {
 }, []);
 ```
 
+(Trimmed: the real code also has a `.catch` that shows a failed load in the error message.)
+
 The function inside runs *after* React has put the render on screen, so the page appears at once, showing "No skill nodes yet.", and the list fills in when Rust answers. Loading the list can't happen inside the component function itself, because that runs on every render and would ask Rust again after every keystroke.
 
 The `[]` at the end is the *dependency list*: the effect runs again only when a value in it changes. An empty list means "only when the component first appears" (*mounts*).

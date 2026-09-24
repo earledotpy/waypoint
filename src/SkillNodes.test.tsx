@@ -65,7 +65,7 @@ test("adds a created node to the list and clears the form", async () => {
   render(<SkillNodes />);
   await screen.findByText("No skill nodes yet.");
 
-  const title = screen.getByLabelText("Title") as HTMLInputElement;
+  const title = screen.getByLabelText("Title (required)") as HTMLInputElement;
   const description = screen.getByLabelText("Description (optional)") as HTMLTextAreaElement;
   fireEvent.change(title, { target: { value: "Read a Rust compiler error" } });
   fireEvent.change(description, { target: { value: "Find the line and the fix." } });
@@ -96,7 +96,7 @@ test("shows the error when create_node fails", async () => {
   render(<SkillNodes />);
   await screen.findByText("No skill nodes yet.");
 
-  const title = screen.getByLabelText("Title") as HTMLInputElement;
+  const title = screen.getByLabelText("Title (required)") as HTMLInputElement;
   fireEvent.change(title, { target: { value: "Read a Rust compiler error" } });
   fireEvent.click(screen.getByRole("button", { name: "Create node" }));
 
