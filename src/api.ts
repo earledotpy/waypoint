@@ -1,7 +1,8 @@
 // The only file that calls the Rust side. Every other file imports these
 // functions, so the command names and argument names are written once, here,
 // and match `src-tauri/src/commands.rs` exactly.
-// See docs/learning/concepts/tauri-command.md.
+// See docs/learning/concepts/tauri-command.md, and
+// promises-and-async-await.md for the `Promise` each function returns.
 import { invoke } from "@tauri-apps/api/core";
 
 /**

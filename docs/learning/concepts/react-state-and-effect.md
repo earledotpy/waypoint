@@ -74,4 +74,6 @@ Issue #19 asks for plain React: no router and no state library. `useState` and `
 ## See also
 
 - [Tauri commands](tauri-command.md): what `listNodes` and `createNode` do on the Rust side.
+- [Promises and `async` / `await`](promises-and-async-await.md): the `.then` in the effect, and why the effect isn't `async`.
+- [JSX](jsx.md): the markup the component returns.
 - React documentation, [State: A Component's Memory](https://react.dev/learn/state-a-components-memory) and [Synchronizing with Effects](https://react.dev/learn/synchronizing-with-effects)

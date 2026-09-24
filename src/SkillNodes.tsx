@@ -1,6 +1,7 @@
 // The skill node screen: a form to create a node, and the list of nodes.
 // See docs/learning/concepts/react-state-and-effect.md for `useState` and
-// `useEffect`.
+// `useEffect`, promises-and-async-await.md for `await` and `.then`, and
+// jsx.md for the markup in `return (…)`.
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { createNode, listNodes } from "./api";
