@@ -1,3 +1,7 @@
+/// <reference types="vitest/config" />
+// The line above lets TypeScript accept the `test` section below, which is
+// Vitest's. Vitest reads this same file, so tests build the code the same
+// way the app does.
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -8,6 +12,14 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vite.dev/config/
 export default defineConfig(() => ({
   plugins: [react(), tailwindcss()],
+
+  // `npm test`. jsdom is a web page simulated inside Node, so a component can
+  // render and be clicked without opening a window. The setup file runs
+  // before each test file.
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./src/test-setup.ts"],
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

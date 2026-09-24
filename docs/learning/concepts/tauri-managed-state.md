@@ -10,12 +10,13 @@
 - `src-tauri/src/lib.rs`, `open_database`: makes the folder, calls `waypoint_domain::open`, and wraps the connection in a `Mutex`.
 - `src-tauri/src/lib.rs`, `Db`: the name for `Mutex<Connection>`, the one type that is managed.
 - The tests in `lib.rs`: `open_database_creates_missing_folder_and_file` and `open_database_twice_keeps_existing_data`. The second one also shows `.lock()` in use.
+- `src-tauri/src/commands.rs`, `create_node` and `list_nodes`: each asks for the connection with a `db: State<'_, Db>` argument and locks it.
 
 ## What it does
 
 A Tauri command is an ordinary Rust function that the UI calls. It can't have the database connection passed in by the UI, because the UI only sends JSON. So Tauri keeps a store of values, one per type, and fills in a command's arguments from it.
 
-`app.manage(db)` puts `db` in that store. It stays there until the app quits. The next issue's commands will ask for it by adding an argument like `db: tauri::State<'_, Db>`, and Tauri looks up the value whose type is `Db` and passes it in.
+`app.manage(db)` puts `db` in that store. It stays there until the app quits. A command asks for it by having an argument `db: tauri::State<'_, Db>` (see [Tauri commands](tauri-command.md)), and Tauri looks up the value whose type is `Db` and passes it in.
 
 The lookup is by type, and it happens when the command is called, not when the code compiles. If a command asks for a type that was never managed (say, a bare `Connection`), it still compiles, and fails at runtime with a "state not managed" error. That's why `lib.rs` names the type once, as `Db`, and every command uses that name.
 
@@ -30,7 +31,7 @@ A rusqlite `Connection` is `Send` but not `Sync`. It can move to another thread,
 
 `Mutex<Connection>` is both `Send` and `Sync`. A `Mutex` (mutual exclusion) lets one thread in at a time. To reach the connection, code calls `.lock()`, which waits until no one else holds it and returns a guard. The guard behaves like the connection, and the lock is released when the guard is dropped, at the end of its block or by an explicit `drop(guard)`, as the tests do.
 
-`.lock()` returns a `Result` (see [`Result` and `?`](result-and-question-mark.md)). It's an `Err` only if another thread panicked while holding the lock, which Rust calls a *poisoned* lock. The tests `.unwrap()` it.
+`.lock()` returns a `Result` (see [`Result` and `?`](result-and-question-mark.md)). It's an `Err` only if another thread panicked while holding the lock, which Rust calls a *poisoned* lock. The tests `.unwrap()` it. The commands call `.expect(POISONED)`, which also panics, but with a message saying why: an earlier panic may have stopped halfway through a write, and carrying on with that connection isn't safe.
 
 ### Why `std::sync::Mutex`, not Tokio's
 

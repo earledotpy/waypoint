@@ -13,25 +13,26 @@ Continuous integration (CI) means a server runs the repo's checks on every propo
 
 A GitHub Actions *workflow* is a YAML file in `.github/workflows/`. `on:` says when it runs. `jobs:` says what runs. Each job gets a fresh virtual machine (`runs-on: windows-latest`) and runs its `steps` in order. If a step fails, the job stops and the pull request shows a red ✗. In the PR's **Checks** tab, each step's `name:` appears as its own line, with that step's log.
 
-Waypoint's job first sets things up: it checks out the code, installs Node 24, and restores the Rust build cache. Then it runs five checks:
+Waypoint's job first sets things up: it checks out the code, installs Node 24, and restores the Rust build cache. Then it runs six checks:
 
 | Step | Command | What it catches |
 |---|---|---|
 | Install frontend dependencies | `npm ci` | `package.json` and `package-lock.json` disagree (someone edited one without the other). It installs exactly the locked versions. |
 | Build frontend | `npm run build` | TypeScript type errors (`tsc`) and a frontend that doesn't bundle. It also produces `dist/`, which the Rust build embeds, so it runs before the Cargo steps. |
+| Test frontend | `npm test` | A React screen that behaves wrongly: the Vitest tests in `src/`, such as `src/SkillNodes.test.tsx`. They replace the Rust side with a fake, so they don't need Cargo. |
 | Check Rust formatting | `cargo fmt --all --check` | Rust code not formatted the standard way. Nothing is changed. It only reports. |
 | Lint Rust | `cargo clippy --workspace --all-targets -- -D warnings` | Code that compiles but is suspicious or unidiomatic, plus every compiler warning. `-D warnings` makes warnings fail the build. |
 | Test Rust | `cargo test --workspace` | Behaviour that's wrong: every `#[test]` in every crate, such as the database tests in `crates/waypoint-domain/src/db.rs`. |
 
 ## Python comparison
 
-The same idea exists in Python projects. A typical Python CI runs `pip install -r requirements.txt` (or `uv sync --locked`), `ruff format --check`, `ruff check`, `mypy` and `pytest`. Mapped across: `npm ci` ≈ locked install, `cargo fmt --check` ≈ `ruff format --check` / `black --check`, `cargo clippy` ≈ `ruff check`, `tsc` ≈ `mypy`, `cargo test` ≈ `pytest`.
+The same idea exists in Python projects. A typical Python CI runs `pip install -r requirements.txt` (or `uv sync --locked`), `ruff format --check`, `ruff check`, `mypy` and `pytest`. Mapped across: `npm ci` ≈ locked install, `cargo fmt --check` ≈ `ruff format --check` / `black --check`, `cargo clippy` ≈ `ruff check`, `tsc` ≈ `mypy`, `cargo test` and `npm test` ≈ `pytest`.
 
 Where it differs: in Python, CI is often the *first* place type errors show up, because running the code doesn't check types. In Rust the compiler checks types on every build, so a lot of what `mypy` catches in CI already stops `cargo build` on the laptop. Clippy and tests still find what the compiler lets through.
 
 ## Why this code uses it
 
-`AGENTS.md` workflow step 4 says: before opening a PR, run every check the repo defines and make sure they pass locally. `ci.yml` *is* that list of checks, written down once. The agent runs the same five commands locally before pushing, and CI runs them again on a clean Windows machine. That catches what "works on my machine" hides: a file never committed, a lock file out of date, a tool version that differs.
+`AGENTS.md` workflow step 4 says: before opening a PR, run every check the repo defines and make sure they pass locally. `ci.yml` *is* that list of checks, written down once. The agent runs the same six commands locally before pushing, and CI runs them again on a clean Windows machine. That catches what "works on my machine" hides: a file never committed, a lock file out of date, a tool version that differs.
 
 For the author, a green check on a PR means the change builds and passes from scratch. It doesn't replace reading the diff, but it means reviewing can focus on design, not on whether the code compiles.
 
