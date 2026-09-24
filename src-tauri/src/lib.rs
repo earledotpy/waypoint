@@ -1,9 +1,11 @@
-//! The Tauri shell. Each command here will stay thin: parse the input, call one
-//! function in `waypoint_domain` or `waypoint_read`, return the result
-//! (ADR 0001 §2). There are no commands yet.
+//! The Tauri shell. The commands the UI calls are in `commands.rs`, and each
+//! stays thin: parse the input, call one function in `waypoint_domain` or
+//! `waypoint_read`, return the result (ADR 0001 §2).
 //!
 //! At startup, `run` opens the database and hands the connection to Tauri
 //! to hold. See docs/learning/concepts/tauri-managed-state.md.
+
+mod commands;
 
 use std::path::Path;
 use std::sync::Mutex;
@@ -67,6 +69,13 @@ pub fn run() {
             app.manage(db);
             Ok(())
         })
+        // The list of commands the UI may call. A command missing from here
+        // still compiles, but `invoke` fails at runtime with "Command … not
+        // found". See docs/learning/concepts/tauri-command.md.
+        .invoke_handler(tauri::generate_handler![
+            commands::create_node,
+            commands::list_nodes
+        ])
         // `generate_context!` reads tauri.conf.json and embeds the built
         // frontend (`dist/`) into the binary at compile time.
         .run(tauri::generate_context!())

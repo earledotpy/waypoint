@@ -4,7 +4,7 @@ A local-first desktop app for tracking skill development through **evidence of d
 
 It is also a learning project. Agents build it, and the author observes, reviews and decides. Every change comes with explanations written to be learned from (design doc §12).
 
-**Status:** milestone 1 (walking skeleton) in progress. The app opens an empty window.
+**Status:** milestone 1 (walking skeleton) in progress. The app can create skill nodes and list them.
 
 - [Design document](docs/design-document.md)
 - [Architecture & schema](docs/architecture-schema.md)

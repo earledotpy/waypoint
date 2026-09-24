@@ -48,6 +48,12 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      # Runs the Vitest tests in src/. They render React components in jsdom
+      # and replace the Rust side with a fake (`mockIPC`), so they need
+      # neither Cargo nor a window.
+      - name: Test frontend
+        run: npm test
+
       # Fails if any Rust file isn't formatted the way `cargo fmt` would
       # format it. This keeps diffs about behaviour, not whitespace.
       - name: Check Rust formatting

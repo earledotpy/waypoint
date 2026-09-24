@@ -25,13 +25,14 @@ pub enum DomainError {
 }
 
 // `Display` is the human-readable message, what `print(str(e))` shows in
-// Python. The app will pass it on to the UI.
+// Python. The app's commands pass it on to the UI as it is, so a variant the
+// user can fix themselves reads as a full sentence addressed to them.
 impl fmt::Display for DomainError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DomainError::Database(e) => write!(f, "database error: {e}"),
             DomainError::Migration(e) => write!(f, "migration error: {e}"),
-            DomainError::EmptyTitle => write!(f, "a skill node needs a title"),
+            DomainError::EmptyTitle => write!(f, "A node needs a title."),
         }
     }
 }
@@ -60,5 +61,17 @@ impl From<rusqlite::Error> for DomainError {
 impl From<rusqlite_migration::Error> for DomainError {
     fn from(e: rusqlite_migration::Error) -> Self {
         DomainError::Migration(e)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty_title_message_is_a_sentence_for_the_user() {
+        // The app shows this text as it is, under the form, so it's written
+        // for the person typing, not for a developer reading a log.
+        assert_eq!(DomainError::EmptyTitle.to_string(), "A node needs a title.");
     }
 }
