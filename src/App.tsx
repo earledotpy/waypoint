@@ -1,10 +1,12 @@
-import SkillNodes from "./SkillNodes";
+// THROWAWAY PROTOTYPE branch: the real screen is swapped for the issue #42
+// prototype. Never merge this file.
+import Prototype from "../prototype/m2-screen/Prototype";
 
 function App() {
   return (
-    <main className="mx-auto max-w-2xl space-y-6 p-6">
+    <main className="mx-auto max-w-3xl space-y-6 p-6">
       <h1>Waypoint</h1>
-      <SkillNodes />
+      <Prototype />
     </main>
   );
 }
