@@ -187,7 +187,7 @@ On the way down:
 
 1. `src/SkillNodes.tsx`, `handleSubmit`: stops the page reloading, then asks for the node to be made and waits.
 2. `src/api.ts`, `createNode`: sends the title and description to Rust with `invoke("create_node", …)`, written as JSON.
-3. `src-tauri/src/commands.rs`, `create_node` (the Tauri command): takes the lock on the one database connection, then calls the domain.
+3. `src-tauri/src/commands.rs`, `create_node` (the Tauri command): takes the [lock](../glossary.md#lock-and-mutex) on the one database [connection](../glossary.md#connection), then calls the domain.
 4. `src-tauri/src/lib.rs`, `Db` and `run`: not a step the request passes through, but where the connection the command locks comes from. `run` opened it at startup.
 5. `crates/waypoint-domain/src/node.rs`, `create_node` (the domain): trims the title, refuses a blank one, makes a new id, and runs the `INSERT`.
 6. The `skill_node` table, made by `crates/waypoint-domain/migrations/0001_create_skill_node.sql`: checks its rules, stores the row, and hands it back with `RETURNING`.
@@ -223,14 +223,14 @@ See [When the title is blank](#when-the-title-is-blank).
 
 When the domain refuses something, it hands back its own Rust error value, a `DomainError`. The screen can't receive that kind of value as it is. Where is it turned into plain text, and why does it have to be?
 
-**A complete answer:** names the file and the function, quotes the piece of code that does the turning, and gives the reason the screen needs text.
+**A complete answer:** names the file and the function, quotes the piece of code that does the turning, and says what stops the `DomainError` itself from being sent.
 
 <details>
 <summary>Model answer</summary>
 
 In `src-tauri/src/commands.rs`, in the Tauri command `create_node`, the piece `.map_err(|e| e.to_string())` does it. It leaves a success alone, and turns an error into its message, such as "A node needs a title.".
 
-It has to, because everything sent to the screen must be turned into [JSON](../glossary.md#json) first, and a plain message is both easy to send that way and exactly what the screen shows the user.
+It has to, because everything sent to the screen must be turned into [JSON](../glossary.md#json) first, and `DomainError` can't be: it isn't marked with `Serialize`, the label that lets a Rust value become JSON (see [serialize](../glossary.md#serialize-and-deserialize)). Its text message can, and that message is exactly what the screen shows the user.
 
 See step 3, [Tauri command: lock, call, translate](#3-tauri-command-lock-call-translate), and "Errors must turn into JSON too" in the [Tauri commands](../concepts/tauri-command.md) note.
 
@@ -264,7 +264,7 @@ One of Waypoint's [invariants](../glossary.md#invariant) says that every time a 
 
 It's I7. The history table, `node_state_event`, only arrives in milestone 2, so there's nowhere to write the line yet. A `TODO(milestone 2): I7` comment in the domain's `create_node` marks the spot, and milestone 2 will add the missing line for every node made before then.
 
-What stops `'availabel'` today is the `CHECK` constraint on the `state` column of the `skill_node` table, which only allows the four real states. Its test is `skill_node_rejects_unknown_state`. (In milestone 2, a Rust enum will stop the misspelling even earlier, while compiling.)
+What stops `'availabel'` today is the `CHECK` constraint on the `state` column of the `skill_node` table, which only allows the four real states. Its test is `skill_node_rejects_unknown_state`. (In milestone 2, a Rust [enum](../concepts/enums-and-match.md) will stop the misspelling even earlier, while compiling.)
 
 See [Invariants on the way](#invariants-on-the-way).
 

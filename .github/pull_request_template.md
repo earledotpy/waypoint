@@ -24,7 +24,7 @@ Closes #
 
 <!-- One to three questions about this PR's code, in plain words, mixing "what does this do?" and "why is it this way?". Each links to where its answer lives (a concept note, a glossary entry, a file and function, a section of this description) without giving the answer. -->
 
-Tick any question you can't answer, or reword one in a comment. Claude files each ticked question as a `learning:question` issue and answers it in this PR, before merge.
+Tick any question you can't answer, or reword one in a comment. The agent files each ticked question as a `learning:question` issue and answers it in this PR, before merge.
 
 - [ ] <!-- question --> (answer in: <!-- link -->)
 

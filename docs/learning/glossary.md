@@ -2,7 +2,7 @@
 
 This page explains the general programming words used in Waypoint's docs, in plain words. It assumes you know basic Python and nothing else. Waypoint's own words (node, evidence record, Locked, Available…) are in [`CONTEXT.md`](../../CONTEXT.md), not here.
 
-Each entry starts with a plain explanation. Some then add **In Python**, the nearest thing you may already know, and **In Waypoint**, where you'll meet it in this code. When an entry uses another word from this page, it links to it. The Rust and TypeScript constructs that have their own concept note are listed [at the end](#words-with-their-own-concept-note).
+Each entry starts with a plain explanation. Some then add **In Python**, the nearest thing you may already know, and **In Waypoint**, where you'll meet it in this code. When an entry uses another word from this page, it links to it. The [Rust and TypeScript](#rust-and-typescript) constructs that have their own concept note are listed [at the end](#words-with-their-own-concept-note).
 
 **Adding a word.** When a PR uses a general programming word that isn't here, it adds an entry in the same PR, in alphabetical order. Follow the format above, and explain the word using only plain words or links to other entries on this page.
 
@@ -301,6 +301,15 @@ What a [function](#function) hands back to the code that called it, when it fini
 
 See [Table, row and column](#table-row-and-column).
 
+### Rust and TypeScript
+
+The two programming languages Waypoint is written in, other than [SQL](#sql).
+
+- **Rust** is used for everything behind the screen: the rules, and saving and reading data. A [compiler](#compile-and-compiler) checks it strictly before it runs, which catches many mistakes early.
+- **TypeScript** is used for the screen. It is JavaScript, the language every web browser runs, with [types](#type) added so mistakes are caught before it runs.
+
+**In Python:** both do the same jobs Python can do. The biggest difference you'll notice is that they check much more before the program runs.
+
 ### Schema
 
 The shape of a [database](#database): which [tables](#table-row-and-column) it has, their columns, and their [constraints](#constraint).
@@ -354,7 +363,7 @@ A test is code that runs other code and checks the result. A unit test checks on
 
 **In Python:** pytest, and the `assert` statement.
 
-**In Waypoint:** `cargo test` runs the Rust tests, and `npm test` runs the screen's. See the [Rust unit tests](concepts/rust-unit-tests.md) note.
+**In Waypoint:** both the Rust code and the screen have tests, and they all run on every PR. See the [Rust unit tests](concepts/rust-unit-tests.md) note.
 
 ### Thread
 
