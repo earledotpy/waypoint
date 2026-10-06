@@ -172,10 +172,100 @@ Every concept note milestone 1 wrote, in the order this walkthrough meets them:
 
 ## Check yourself
 
-Answer these without help, then check your answers against the sections above.
+Answer each question in your own words before opening its model answer. You can use this walkthrough, the concept notes and the [glossary](../glossary.md), but nothing else.
 
-1. Starting from the click on **Create node** and ending with the new line in the list, name the file and the function at every layer the call passes through, on the way down and on the way back up.
-2. Where is a blank title rejected, and what does the user see? SQLite would refuse a blank title too, so why check it there as well, and what would the user see if only SQLite checked?
-3. The Tauri command returns `Result<SkillNode, String>`, but the domain returns `Result<SkillNode, DomainError>`. Which line turns one into the other, and why can't the command just return the `DomainError`?
-4. After a successful create, the new node appears in the list without `list_nodes` being called again. Where does the node on screen come from, and why can you trust that it matches what's in the database?
-5. Creating a node sets its state to `available`. Which invariant says that should also write a second row somewhere, why doesn't it yet, and what stops a misspelled state like `'availabel'` from being stored today?
+### 1. Follow the click all the way down and back
+
+When you click **Create node**, your request travels from the screen, through the Rust code, into the database, and the new node travels back up to the screen. List every stop it makes along the way, in order.
+
+**A complete answer:** for each stop, both on the way down and on the way back up, names the file *and* the function (or, for the database, the table) that handles it, and says in a few words what happens there.
+
+<details>
+<summary>Model answer</summary>
+
+On the way down:
+
+1. `src/SkillNodes.tsx`, `handleSubmit`: stops the page reloading, then asks for the node to be made and waits.
+2. `src/api.ts`, `createNode`: sends the title and description to Rust with `invoke("create_node", …)`, written as JSON.
+3. `src-tauri/src/commands.rs`, `create_node` (the Tauri command): takes the lock on the one database connection, then calls the domain.
+4. `src-tauri/src/lib.rs`, `Db` and `run`: not a step the request passes through, but where the connection the command locks comes from. `run` opened it at startup.
+5. `crates/waypoint-domain/src/node.rs`, `create_node` (the domain): trims the title, refuses a blank one, makes a new id, and runs the `INSERT`.
+6. The `skill_node` table, made by `crates/waypoint-domain/migrations/0001_create_skill_node.sql`: checks its rules, stores the row, and hands it back with `RETURNING`.
+
+On the way back up:
+
+7. `crates/waypoint-read/src/node.rs`, `SkillNode::from_row`: copies the returned row into a `SkillNode`.
+8. `src-tauri/src/commands.rs`, `create_node`: passes the `SkillNode` back, and Tauri turns it into JSON.
+9. `src/SkillNodes.tsx`, `handleSubmit`: the `await` finishes, `setNodes` stores a new list with the node on the end, and the screen is drawn again with one more line.
+
+See [The path](#the-path) and [Step by step](#step-by-step).
+
+</details>
+
+### 2. A title that's only spaces
+
+You type three spaces as the title and click **Create node**. Which part of the app says no, and what do you see on the screen? The database has its own rule against blank titles, so why does the app check earlier as well?
+
+**A complete answer:** names the file and function that refuses the title, quotes the message you see, says what happens to what you typed, and says what you would see instead if only the database checked.
+
+<details>
+<summary>Model answer</summary>
+
+The domain refuses it: `create_node` in `crates/waypoint-domain/src/node.rs`. It trims the title to nothing, sees it's empty, and returns the `EmptyTitle` error before the database is asked anything. On screen, "A node needs a title." appears above the button, and the three spaces stay in the box so you can fix them.
+
+The domain checks first because it can give a message written for the person typing. If only the database checked, its rule (a `CHECK` [constraint](../glossary.md#constraint)) would still refuse the row, but you would see a developer's message like "database error: CHECK constraint failed: …". The database rule is a backstop that catches a future bug, such as a new way of adding nodes that forgets to check.
+
+See [When the title is blank](#when-the-title-is-blank).
+
+</details>
+
+### 3. Turning a Rust error into words for the screen
+
+When the domain refuses something, it hands back its own Rust error value, a `DomainError`. The screen can't receive that kind of value as it is. Where is it turned into plain text, and why does it have to be?
+
+**A complete answer:** names the file and the function, quotes the piece of code that does the turning, and gives the reason the screen needs text.
+
+<details>
+<summary>Model answer</summary>
+
+In `src-tauri/src/commands.rs`, in the Tauri command `create_node`, the piece `.map_err(|e| e.to_string())` does it. It leaves a success alone, and turns an error into its message, such as "A node needs a title.".
+
+It has to, because everything sent to the screen must be turned into [JSON](../glossary.md#json) first, and a plain message is both easy to send that way and exactly what the screen shows the user.
+
+See step 3, [Tauri command: lock, call, translate](#3-tauri-command-lock-call-translate), and "Errors must turn into JSON too" in the [Tauri commands](../concepts/tauri-command.md) note.
+
+</details>
+
+### 4. Where the new line on the screen comes from
+
+After a node is created, it appears in the list straight away, but the screen never asks for the whole list again. So where does the node it shows come from, and why can you trust that it matches what's saved in the database?
+
+**A complete answer:** says what the database hands back after saving, which function passes it up to the screen, and why that copy is the true one.
+
+<details>
+<summary>Model answer</summary>
+
+It comes from the database itself. The `INSERT` ends with `RETURNING`, which hands back the row exactly as it was saved. That row becomes a `SkillNode`, travels back up through the command, and `handleSubmit` adds it to the list with `setNodes([...nodes, created])`.
+
+You can trust it because it's what was really stored, not what the Rust code meant to store. That includes the creation time, which the database chose itself.
+
+See [5. SQLite: the row](#5-sqlite-the-row) and [6. Back up](#6-back-up-row--struct--json--screen).
+
+</details>
+
+### 5. The history line that isn't written yet
+
+One of Waypoint's [invariants](../glossary.md#invariant) says that every time a node's state changes, including when the node is first created, the app also writes a line to a history table. Creating a node today doesn't write that line. Which invariant is it, why is the line missing, and what stops a misspelled state such as `'availabel'` from being saved today?
+
+**A complete answer:** gives the invariant's number, says when the history table arrives and how the code marks the gap, and names the rule that refuses a misspelled state along with the test that proves it.
+
+<details>
+<summary>Model answer</summary>
+
+It's I7. The history table, `node_state_event`, only arrives in milestone 2, so there's nowhere to write the line yet. A `TODO(milestone 2): I7` comment in the domain's `create_node` marks the spot, and milestone 2 will add the missing line for every node made before then.
+
+What stops `'availabel'` today is the `CHECK` constraint on the `state` column of the `skill_node` table, which only allows the four real states. Its test is `skill_node_rejects_unknown_state`. (In milestone 2, a Rust enum will stop the misspelling even earlier, while compiling.)
+
+See [Invariants on the way](#invariants-on-the-way).
+
+</details>
