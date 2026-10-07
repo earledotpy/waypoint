@@ -269,6 +269,14 @@ See [Crash and panic](#crash-and-panic).
 
 A link to a file as it was at one exact [commit](#commit). It keeps showing the same lines even after the code changes. Walkthroughs use permalinks so their links stay right.
 
+### Primary key
+
+The [column](#table-row-and-column) whose value picks out exactly one [row](#table-row-and-column) of a [table](#table-row-and-column). No two rows may share it, and it's never empty. Other tables point at a row by storing its primary key; that pointer is a *foreign key* (see the [Foreign keys](concepts/foreign-keys.md) note).
+
+**In Python:** the key of a dictionary: `nodes[id]` finds exactly one node.
+
+**In Waypoint:** every table's primary key is a column called `id` holding a [UUID](#uuid).
+
 ### Promise
 
 An IOU for a value that isn't ready yet. A slow [async](#async) function hands back a promise straight away. Later the promise either *resolves* (here's the value) or *rejects* (here's the [error](#error-and-exception)). `await` waits for that to happen.
@@ -414,6 +422,7 @@ These are Rust or TypeScript constructs rather than general programming words. E
 | Cargo, workspace | [Cargo workspace](concepts/cargo-workspace.md) |
 | CI, continuous integration | [Continuous integration](concepts/continuous-integration.md) |
 | `enum`, variant, `match` | [Enums and `match`](concepts/enums-and-match.md) |
+| Foreign key, `REFERENCES`, `PRAGMA foreign_keys` | [Foreign keys](concepts/foreign-keys.md) |
 | JSX | [JSX](concepts/jsx.md) |
 | `async`, `await`, promise | [Promises and `async` / `await`](concepts/promises-and-async-await.md) |
 | `useState`, `useEffect` | [React state and effects](concepts/react-state-and-effect.md) |
