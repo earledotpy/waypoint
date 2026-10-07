@@ -1,8 +1,15 @@
 # <Concept>
 
-<!-- One concept per note, under about one screen. Refer to code by file and function name, not line numbers, so the note stays true as code moves. -->
+<!-- One concept per note, under about one screen. Refer to code by file and function name, not line numbers, so the note stays true as code moves.
+Write for a reader who knows basic Python, no Rust or TypeScript, and no general programming vocabulary. Every technical word is defined in plain words where it first appears, or linked to docs/learning/glossary.md or another concept note. -->
+
+## In plain words
+
+<!-- Two or three sentences with no jargon at all: what problem this solves and what it looks like from the outside. A reader who stops here should still be able to say roughly what the concept is for. -->
 
 ## In one line
+
+<!-- The precise, technical version in one sentence. -->
 
 ## Where it appears here
 

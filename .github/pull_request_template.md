@@ -2,7 +2,7 @@ Closes #
 
 ## What changed
 
-<!-- Two or three sentences, in plain words. -->
+<!-- Plain first, then precise: two or three sentences a reader with no programming vocabulary can follow, then the technical version if it's needed. Define each technical word in plain words or link it to docs/learning/glossary.md. -->
 
 ## Why this shape
 
@@ -19,6 +19,14 @@ Closes #
 ## Concepts
 
 <!-- New concept notes written in this PR, and existing ones the diff relies on (link each). Or "none". -->
+
+## Questions you might have
+
+<!-- One to three questions about this PR's code, in plain words, mixing "what does this do?" and "why is it this way?". Each links to where its answer lives (a concept note, a glossary entry, a file and function, a section of this description) without giving the answer. -->
+
+Tick any question you can't answer, or reword one in a comment. The agent files each ticked question as a `learning:question` issue and answers it in this PR, before merge.
+
+- [ ] <!-- question --> (answer in: <!-- link -->)
 
 ## Check it yourself
 

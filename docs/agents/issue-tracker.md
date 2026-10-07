@@ -24,5 +24,9 @@ These conventions are carried over from SkillTrace.
 Build issues are the work that follows a wayfinder map. They are not children of the map.
 
 - **`ready-for-agent`** means the issue is specified and an agent can build it. Build issues use `.github/ISSUE_TEMPLATE/build.md`. Only the author applies this label, after reading the body. Adding it is the author saying "I understand what this will build".
-- **`learning:question`** marks part of a merged PR that the author didn't follow. The author files it in their own words with `.github/ISSUE_TEMPLATE/learning-question.md`: where, what they didn't follow, and optionally their guess. The issue holds only the question. It then gets `ready-for-agent` like any other build issue, and it is answered with a new or edited concept note in a PR that closes it.
+- **`learning:question`** marks part of a PR that the author didn't follow. It arrives one of two ways:
+  - **Before merge.** The author ticks (or rewords) one of the PR's "Questions you might have". The agent files it with `.github/ISSUE_TEMPLATE/learning-question.md`, using the author's wording, and answers it with a new or edited concept note in that same PR, which closes it. It doesn't need `ready-for-agent`.
+  - **After merge.** The author files it in their own words with the same template: where, what they didn't follow, and optionally their guess. The issue holds only the question. It then gets `ready-for-agent` like any other build issue, and it is answered with a new or edited concept note in a PR that closes it.
+
+  Only the after-merge ones count towards the reading-level revisit (design doc §5).
 - **`bug`** is kept. No other labels are in use.
