@@ -26,7 +26,7 @@ from_node_id TEXT NOT NULL REFERENCES skill_node (id),
 
 The check also runs the other way. Deleting a node that an edge still points at would leave the edge pointing at nothing, so SQLite refuses that too. A foreign key can say what to do instead, with `ON DELETE CASCADE` (delete the edges too) or `ON DELETE SET NULL` (blank the pointer). Waypoint's don't, because nodes are never deleted: retiring a node is a mark (`retired_at`), not a deletion.
 
-There's one catch. For historical reasons, SQLite ignores every `REFERENCES` unless the connection has run `PRAGMA foreign_keys = ON`, and the setting lasts only as long as that connection. Forget it, and the table still accepts edges to nodes that don't exist, with no error. That's why `prepare` turns it on for every connection, and why `open` is the only way Waypoint opens one (see [SQLite migrations](sqlite-migrations.md), "Why this code uses it").
+There's one catch. A *pragma* is a SQLite command that changes a setting rather than reading or writing data. For historical reasons, SQLite ignores every `REFERENCES` unless the connection has run `PRAGMA foreign_keys = ON`, and the setting lasts only as long as that connection. Forget it, and the table still accepts edges to nodes that don't exist, with no error. That's why `prepare` turns it on, and why every connection Waypoint makes goes through `prepare`: the app's through `open`, and the tests' through `open_in_memory` (see [SQLite migrations](sqlite-migrations.md), "Why this code uses it").
 
 ## Python comparison
 
@@ -46,7 +46,7 @@ Where the comparison breaks:
 
 ## Why this code uses it
 
-The Rust domain layer will check that both nodes exist before it adds an edge (milestone 2, step 6), and that check gives the clear message. The foreign key is a backstop, like the `CHECK`s in migration 0001: if a bug ever slips past the Rust check, the database still refuses an edge that points at nothing. An edge like that would quietly break prerequisite arithmetic and the I5 cycle check, which both follow edges from node to node.
+The Rust domain layer will check that both nodes exist before it adds an edge ([Add an edge, with I5 and prerequisite arithmetic](https://github.com/earledotpy/waypoint/issues/50)), and that check gives the clear message. The foreign key is a backstop, like the `CHECK`s in migration 0001: if a bug ever slips past the Rust check, the database still refuses an edge that points at nothing. An edge like that would quietly break prerequisite arithmetic and the I5 cycle check, which both follow edges from node to node.
 
 ## See also
 

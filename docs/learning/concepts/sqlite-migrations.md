@@ -19,10 +19,10 @@ The schema (the tables and their columns) changes as Waypoint grows, but the lea
 SQLite has a built-in slot for "which version is this file at": `PRAGMA user_version`, a single integer stored in the file's header. It starts at 0. The `rusqlite_migration` library uses it like this:
 
 1. Read `user_version`. Say it's 0.
-2. Run every migration after that one, in order. For a brand-new file that's `0001_create_skill_node.sql`. They all run inside one transaction, so either all of them happen or none do.
-3. Set `user_version` to the number of the last migration run (here, 1).
+2. Run every migration after that one, in order. For a brand-new file that's `0001_create_skill_node.sql`, then `0002_create_skill_edge.sql`. They all run inside one transaction, so either all of them happen or none do.
+3. Set `user_version` to the number of the last migration run (here, 2).
 
-Opening the same file again finds `user_version = 1`, sees that nothing is newer, and does nothing. That's what `open_is_idempotent` checks. Milestone 2 added `0002_create_skill_edge.sql` to the list in `migrations`, so a file made in milestone 1 (at version 1) gets only migration 2 the next time it's opened, and ends at version 2. A brand-new file gets both, in order.
+Opening the same file again finds `user_version = 2`, sees that nothing is newer, and does nothing. That's what `open_is_idempotent` checks. A file made in milestone 1 is at version 1, because only migration 1 existed then. The next time it's opened, it gets only migration 2 and ends at version 2, just like a brand-new file.
 
 Two rules follow:
 

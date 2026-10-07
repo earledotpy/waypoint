@@ -155,8 +155,8 @@ It serves as the audit trail for P2/P5, and as the data behind the Daily Brief's
 
 **Constraints:**
 - `UNIQUE (from_node_id, to_node_id, edge_type)`. Duplicate edges were previously unconstrained. Because `edge_type` is part of it, the same pair may have one Prerequisite and one Recommendation.
-- `CHECK (from_node_id <> to_node_id)`: no self-edges. A backstop: the domain layer refuses a self-edge first, with a clear message.
-- Both node columns `REFERENCES skill_node (id)`, with no `ON DELETE`, because nodes are never deleted (retirement is a mark). They rely on `PRAGMA foreign_keys = ON`, which `db::open` sets on every connection.
+- `CHECK (from_node_id <> to_node_id)`: no self-edges. A backstop: the domain layer refuses a self-edge first, with a clear message ([Add an edge](https://github.com/earledotpy/waypoint/issues/50)).
+- Both node columns `REFERENCES skill_node (id)`, with no `ON DELETE`, because nodes are never deleted (retirement is a mark). They rely on `PRAGMA foreign_keys = ON`, which `db::prepare` sets on every connection (both `open` and `open_in_memory` call it).
 
 **New constraint (I5, below):** acyclicity is enforced at edge-creation time by the domain layer — every reviewer that looked at the schema flagged that `locked`/`available` computation silently assumes a DAG with no invariant actually preventing a cycle.
 

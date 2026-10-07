@@ -12,13 +12,11 @@ CREATE TABLE skill_edge (
     -- to_node_id is B. The arrow points the way you learn, from what comes
     -- first to what it unlocks (issue #41, "How I5 checks for a cycle").
     --
-    -- REFERENCES makes each a foreign key: it must hold the id of a node that
-    -- really exists (docs/learning/concepts/foreign-keys.md). SQLite ignores
-    -- REFERENCES unless the connection turns foreign keys on, so `prepare` in
-    -- src/db.rs runs `conn.pragma_update(None, "foreign_keys", "ON")` on every
-    -- connection. There's no ON DELETE (what to do with an edge when its node
-    -- is deleted), because nodes are never deleted: Retired is a mark
-    -- (skill_node.retired_at), not a deletion.
+    -- The REFERENCES (docs/learning/concepts/foreign-keys.md) only work
+    -- because `prepare` in src/db.rs runs
+    -- `conn.pragma_update(None, "foreign_keys", "ON")` on every connection;
+    -- without it SQLite ignores them. No ON DELETE, because nodes are never
+    -- deleted: Retired is a mark (skill_node.retired_at), not a deletion.
     from_node_id TEXT NOT NULL REFERENCES skill_node (id), -- the prerequisite: learned first
     to_node_id   TEXT NOT NULL REFERENCES skill_node (id), -- the dependent: waits for from_node_id
 
@@ -35,6 +33,7 @@ CREATE TABLE skill_edge (
     UNIQUE (from_node_id, to_node_id, edge_type),
 
     -- No edge from a node to itself. The domain refuses these first, with a
-    -- clear message (milestone 2, step 6); this catches a bug that slips past.
+    -- clear message (issue #50, "Add an edge"); this catches a bug that slips
+    -- past.
     CHECK (from_node_id <> to_node_id)
 ) STRICT;
