@@ -139,6 +139,14 @@ One named piece of data inside a bigger value.
 
 **In Waypoint:** a `SkillNode` has the fields `id`, `title`, `description`, `state`, `created_at` and more.
 
+### Foreign key
+
+A [column](#table-row-and-column) that points at a [row](#table-row-and-column) in another table by holding that row's [primary key](#primary-key), plus a [constraint](#constraint) that the row must really exist. The [database](#database) refuses to store a pointer to nothing.
+
+**In Python:** like requiring `nodes[edge.from_node_id]` to succeed before an edge is saved.
+
+**In Waypoint:** `skill_edge.from_node_id` and `to_node_id` point at `skill_node.id`. See the [Foreign keys](concepts/foreign-keys.md) note.
+
 ### Frontend and backend
 
 The frontend is the part of an app people see and click. The backend is the part behind it that does the work, such as storing data and applying rules.
@@ -268,6 +276,14 @@ See [Crash and panic](#crash-and-panic).
 ### Permalink
 
 A link to a file as it was at one exact [commit](#commit). It keeps showing the same lines even after the code changes. Walkthroughs use permalinks so their links stay right.
+
+### Primary key
+
+The [column](#table-row-and-column) whose value picks out exactly one [row](#table-row-and-column) of a [table](#table-row-and-column). No two rows may share it, and it's never empty. Other tables point at a row by storing its primary key; that pointer is a [foreign key](#foreign-key).
+
+**In Python:** the key of a dictionary: `nodes[id]` finds exactly one node.
+
+**In Waypoint:** every table's primary key is a column called `id` holding a [UUID](#uuid).
 
 ### Promise
 

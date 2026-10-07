@@ -12,6 +12,10 @@ _Avoid_: tree, roadmap
 One demonstrable capability in the skill graph. It advances only through accepted evidence. "Node" is fine as the short form, and a retired node is still a node.
 _Avoid_: skill (that's your ability, not the record), card, topic, task
 
+**Edge**:
+A Prerequisite or a Recommendation between two nodes.
+_Avoid_: link, arrow, dependency
+
 **Prerequisite**:
 A node that must be evidenced before a dependent node becomes available. Written as "A is a prerequisite of B".
 _Avoid_: dependency, hard edge

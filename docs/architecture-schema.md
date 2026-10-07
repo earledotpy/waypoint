@@ -145,12 +145,20 @@ It serves as the audit trail for P2/P5, and as the data behind the Daily Brief's
 ### `skill_edge`
 | Field | Type | Notes |
 |---|---|---|
-| `from_node_id` | TEXT FK | |
-| `to_node_id` | TEXT FK | |
+| `id` | TEXT PK | UUIDv7 (ADR 0002 rule 1). `node_state_event.cause_ref` points at it. |
+| `from_node_id` | TEXT FK | The prerequisite (or recommended) node: the one learned first. |
+| `to_node_id` | TEXT FK | The dependent node. |
 | `edge_type` | TEXT | enum: `hard_prerequisite`, `soft_recommendation` (a Prerequisite and a Recommendation in `CONTEXT.md`) |
 | `reason` | TEXT NULL | **New (v0.4).** Why the edge exists, in plain words. Optional for edges authored in the app. Every imported edge carries its SkillTrace reason. The Daily Brief's inline driver can show it. |
 
-**New constraint (I5, below):** acyclicity is enforced at edge-creation time by the domain layer — every reviewer that looked at the schema flagged that `locked`/`available` computation silently assumes a DAG with no invariant actually preventing a cycle. Also new: a uniqueness constraint on `(from_node_id, to_node_id, edge_type)` — duplicate edges were previously unconstrained.
+**Direction:** for "A is a prerequisite of B", `from_node_id` is A and `to_node_id` is B, so the edge points the way you learn ([How I5 checks for a cycle](https://github.com/earledotpy/waypoint/issues/41)).
+
+**Constraints:**
+- `UNIQUE (from_node_id, to_node_id, edge_type)`. Duplicate edges were previously unconstrained. Because `edge_type` is part of it, the same pair may have one Prerequisite and one Recommendation.
+- `CHECK (from_node_id <> to_node_id)`: no self-edges. A backstop: the domain layer refuses a self-edge first, with a clear message ([Add an edge](https://github.com/earledotpy/waypoint/issues/50)).
+- Both node columns `REFERENCES skill_node (id)`, with no `ON DELETE`, because nodes are never deleted (retirement is a mark). They rely on `PRAGMA foreign_keys = ON`, which `db::prepare` sets on every connection (both `open` and `open_in_memory` call it).
+
+**New constraint (I5, below):** acyclicity is enforced at edge-creation time by the domain layer — every reviewer that looked at the schema flagged that `locked`/`available` computation silently assumes a DAG with no invariant actually preventing a cycle.
 
 ### `evidence_record`
 | Field | Type | Notes |

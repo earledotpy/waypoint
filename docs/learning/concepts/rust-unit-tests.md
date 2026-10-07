@@ -6,7 +6,7 @@ A Rust unit test is a function marked `#[test]`, kept in a `mod tests` block at 
 
 ## Where it appears here
 
-- `crates/waypoint-domain/src/db.rs`, `mod tests`: the database tests (`migrations_are_valid`, `open_in_memory_creates_skill_node_table`, `open_is_idempotent`, `open_turns_on_foreign_keys_and_wal`, `skill_node_rejects_unknown_state`).
+- `crates/waypoint-domain/src/db.rs`, `mod tests`: the database tests (`migrations_are_valid`, `open_in_memory_creates_every_table`, `open_is_idempotent`, `open_turns_on_foreign_keys_and_wal`, `skill_node_rejects_unknown_state`, and the five `skill_edge_…` tests).
 - `crates/waypoint-domain/Cargo.toml`, `[dev-dependencies]`: `tempfile`, a crate only the tests use.
 
 ## What it does
